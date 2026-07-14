@@ -1,47 +1,112 @@
 # Fashion Retail SQL Analysis
 
 ## Project Overview
-This project analyzes a synthetic fashion retail dataset to uncover insights into customer behavior, product performance, store performance, and revenue trends.  
 
-The goal is to simulate a real-world retail analytics environment by performing end-to-end SQL analysis, including data cleaning, transformation, and business insights.
+This project analyzes a synthetic fashion retail dataset to uncover insights into customer purchasing behavior, product performance, store performance, and revenue trends.
+
+The project follows a complete analytics workflow, including data cleaning, data validation, SQL analysis, and business recommendations using MySQL.
+
+> **Note:** This project uses a synthetic dataset for analytical practice. The objective is to demonstrate SQL-based data cleaning, transformation, and business analysis techniques rather than model real-world financial performance.
 
 ---
 
 ## Business Objectives
-- Identify top-performing and underperforming products and categories  
-- Analyze customer purchasing behavior by age demographics  
-- Evaluate store and regional performance  
-- Analyze revenue distribution across discount levels
-- Identify monthly sales trends and seasonality patterns  
+
+- Analyze revenue and profit across product categories
+- Identify customer purchasing trends by age group
+- Evaluate store and regional performance
+- Measure revenue distribution across discount levels
+- Analyze monthly revenue trends and month-over-month growth
+- Assess customer revenue concentration
 
 ---
 
-## Data Cleaning & Preparation
+## Tools Used
 
-The raw dataset was cleaned and transformed to ensure accuracy and consistency:
+- MySQL
+- MySQL Workbench
+- Git & GitHub
 
-- Created staging tables for safe transformations  
-- Identified and handled duplicate transaction records  
-- Standardized inconsistent categorical values (e.g. gender = '???')  
-- Converted blank values to NULL  
-- Converted data types (prices → DECIMAL, dates → DATE)  
-- Created customer age group segmentation  
-- Fixed missing product and store references  
+---
+
+## Dataset
+
+The dataset contains four relational tables:
+
+- **Customers** – customer demographics
+- **Products** – product attributes and pricing
+- **Sales** – transaction-level sales records
+- **Stores** – store information and regions
+
+---
+
+## Data Cleaning
+
+A complete staging layer was created before analysis.
+
+Cleaning steps included:
+
+- Created staging tables to preserve raw data
+- Standardized text values using `LOWER()` and `TRIM()`
+- Handled missing values and blank fields
+- Converted empty strings to `NULL`
+- Created customer age groups
+- Rounded pricing fields for consistency
+- Flagged products where `List Price < Cost Price`
+- Validated duplicate transactions
+- Checked for orphan customer and product records
+- Standardized date and numeric data types
+
+---
+
+## SQL Skills Demonstrated
+
+- INNER JOINs across multiple tables
+- Common Table Expressions (CTEs)
+- Window Functions (`ROW_NUMBER`, `RANK`, `LAG`, `SUM OVER`)
+- CASE statements
+- Aggregate Functions
+- Date Functions
+- NULL handling with `COALESCE()`
+- Data validation and cleaning
+- Business KPI calculations
 
 ---
 
 ## Key SQL Analysis
 
-### 1. Revenue by Age Group
+### Executive KPIs
+
+Calculated:
+
+- Total Revenue
+- Total Profit
+- Profit Margin
+
+Result:
+
+- **Total Revenue:** \$11.73M
+- **Total Profit:** \$7.64M
+- **Profit Margin:** 65%
+
+---
+
+### Customer Revenue Ranking
+
+Used a window function to rank customers based on total revenue generated.
+
 ```sql
-SELECT 
-    customer_id,
+SELECT
+    c.customer_id,
     SUM(s.quantity * p.list_price * (1 - COALESCE(s.discount,0))) AS total_revenue,
     ROW_NUMBER() OVER (
         ORDER BY SUM(s.quantity * p.list_price * (1 - COALESCE(s.discount,0))) DESC
     ) AS ranking
 FROM sales_clean s
-JOIN customers_clean c ON s.customer_id = c.customer_id
-JOIN products_clean p ON s.product_id = p.product_id
+JOIN customers_clean c
+    ON s.customer_id = c.customer_id
+JOIN products_clean p
+    ON s.product_id = p.product_id
+WHERE p.price_issue_flag = 0
 GROUP BY c.customer_id
 LIMIT 10;
