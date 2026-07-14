@@ -4,76 +4,119 @@
 
 This project analyzes a synthetic fashion retail dataset to uncover insights into customer purchasing behavior, product performance, store performance, and revenue trends.
 
-The project follows a complete analytics workflow, including data cleaning, data validation, SQL analysis, and business recommendations using MySQL.
+The project follows an end-to-end analytics workflow using MySQL, including data validation, data cleaning, transformation, and business-focused SQL analysis.
 
-> **Note:** This project uses a synthetic dataset for analytical practice. The objective is to demonstrate SQL-based data cleaning, transformation, and business analysis techniques rather than model real-world financial performance.
-
----
-
-## Business Objectives
-
-- Analyze revenue and profit across product categories
-- Identify customer purchasing trends by age group
-- Evaluate store and regional performance
-- Measure revenue distribution across discount levels
-- Analyze monthly revenue trends and month-over-month growth
-- Assess customer revenue concentration
+> **Note:** This project uses a synthetic dataset designed for analytical practice. The purpose of this project is to demonstrate SQL data cleaning, relational database analysis, and business problem-solving rather than represent real-world financial performance.
 
 ---
 
-## Tools Used
+# Business Objectives
+
+The goal of this analysis is to understand:
+
+- Which product categories drive revenue and profitability
+- How customer demographics influence purchasing behavior
+- Which stores and regions perform best
+- How discount levels impact revenue
+- Monthly revenue trends and growth patterns
+- Whether revenue is concentrated among a small group of customers
+
+---
+
+# Tools Used
 
 - MySQL
 
 ---
 
-## Dataset
+# Dataset
 
 The dataset contains four relational tables:
 
-- **Customers** – customer demographics
-- **Products** – product attributes and pricing
-- **Sales** – transaction-level sales records
-- **Stores** – store information and regions
+### Customers
+Contains customer demographic information:
+- Customer ID
+- Age
+- Gender
+- City
+- Email
+
+### Products
+Contains product-level information:
+- Product ID
+- Category
+- Color
+- Size
+- Season
+- Supplier
+- Cost Price
+- List Price
+
+### Sales
+Contains transaction-level sales data:
+- Transaction ID
+- Date
+- Product ID
+- Store ID
+- Customer ID
+- Quantity
+- Discount
+- Returned Status
+
+### Stores
+Contains store information:
+- Store ID
+- Store Name
+- Region
+- Store Size
 
 ---
 
-## Data Cleaning
+# Data Cleaning Process
 
-A complete staging layer was created before analysis.
+A staging layer was created before analysis to preserve the original raw tables.
 
-Cleaning steps included:
+Cleaning and validation steps included:
 
-- Created staging tables to preserve raw data
-- Standardized text values using `LOWER()` and `TRIM()`
-- Handled missing values and blank fields
-- Converted empty strings to `NULL`
+- Created staging tables from raw data
+- Standardized text fields using `LOWER()` and `TRIM()`
+- Converted blank values into `NULL`
+- Handled missing customer email values
+- Standardized inconsistent category values
+- Handled missing product color values
 - Created customer age groups
 - Rounded pricing fields for consistency
 - Flagged products where `List Price < Cost Price`
 - Validated duplicate transactions
-- Checked for orphan customer and product records
+- Checked for orphan product references
 - Standardized date and numeric data types
 
 ---
 
-## SQL Skills Demonstrated
+# SQL Skills Demonstrated
 
-- INNER JOINs across multiple tables
+This project demonstrates:
+
+- Multi-table `INNER JOIN` operations
+- Data cleaning and validation workflows
 - Common Table Expressions (CTEs)
-- Window Functions (`ROW_NUMBER`, `RANK`, `LAG`, `SUM OVER`)
-- CASE statements
-- Aggregate Functions
-- Date Functions
-- NULL handling with `COALESCE()`
-- Data validation and cleaning
+- Window Functions:
+  - `ROW_NUMBER()`
+  - `RANK()`
+  - `LAG()`
+  - `SUM() OVER()`
+- Aggregate functions
+- Conditional logic using `CASE`
+- Date functions
+- NULL handling using `COALESCE()`
 - Business KPI calculations
+- Revenue and profitability analysis
 
 ---
 
-## Key SQL Analysis
+# Key SQL Analysis
 
-### Executive KPIs
+## Executive KPIs
 
 Calculated:
 
@@ -81,17 +124,27 @@ Calculated:
 - Total Profit
 - Profit Margin
 
-Result:
+Results:
 
-- **Total Revenue:** \$11.73M
-- **Total Profit:** \$7.64M
+- **Total Revenue:** $11.73M
+- **Total Profit:** $7.64M
 - **Profit Margin:** 65%
+
+> Results are based on a synthetic dataset and are intended to demonstrate analytical techniques rather than represent realistic retail benchmarks.
 
 ---
 
-### Customer Revenue Ranking
+## Customer Revenue Ranking
 
-Used a window function to rank customers based on total revenue generated.
+Identified the highest-value customers by calculating total revenue contribution.
+
+SQL techniques used:
+
+- Multiple table joins
+- Aggregation
+- Window functions (`ROW_NUMBER`)
+
+Example:
 
 ```sql
 SELECT
@@ -101,9 +154,9 @@ SELECT
         ORDER BY SUM(s.quantity * p.list_price * (1 - COALESCE(s.discount,0))) DESC
     ) AS ranking
 FROM sales_clean s
-JOIN customers_clean c
+JOIN customers_clean c 
     ON s.customer_id = c.customer_id
-JOIN products_clean p
+JOIN products_clean p 
     ON s.product_id = p.product_id
 WHERE p.price_issue_flag = 0
 GROUP BY c.customer_id
