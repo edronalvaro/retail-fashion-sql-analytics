@@ -24,8 +24,6 @@ The project follows a complete analytics workflow, including data cleaning, data
 ## Tools Used
 
 - MySQL
-- MySQL Workbench
-- Git & GitHub
 
 ---
 
